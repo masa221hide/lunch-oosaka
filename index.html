@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>大阪おすすめランチ</title>
+<style>
+  :root {
+    /* グレーのパレット（明るい→暗い） */
+    --gray-50:  #fafafa;
+    --gray-100: #f4f4f5;
+    --gray-200: #e4e4e7;
+    --gray-300: #d4d4d8;
+    --gray-400: #a1a1aa;
+    --gray-500: #71717a;
+    --gray-600: #52525b;
+    --gray-700: #3f3f46;
+    --gray-800: #27272a;
+    --gray-900: #18181b;
+
+    --bg: #ffffff;
+    --bg2: #ffffff;
+    --surface: var(--gray-50);
+    --surface-2: var(--gray-100);
+    --ink: var(--gray-900);
+    --sub: var(--gray-500);
+    --line: var(--gray-200);
+    --line-soft: var(--gray-100);
+    --accent: var(--gray-900);
+    --accent-soft: var(--gray-100);
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.02);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+      "Yu Gothic UI", "Meiryo", sans-serif;
+    background: var(--gray-50);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* ==========================================================
+     ヘッダー背景画像
+     lunch.jpg を index.html と同じフォルダに配置してください。
+     GitHubリポジトリにも lunch.jpg をアップすれば公開サイトにも反映されます。
+     別の写真に変えたい場合は background-image の URL を差し替えてください。
+     ========================================================== */
+  .hero {
+    position: relative;
+    background-color: var(--gray-900); /* 画像読込前/失敗時のフォールバック */
+    background-image:
+      linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.7) 100%),
+      url('lunch.jpg');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    padding: 96px 20px 80px;
+    text-align: center;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .hero h1 {
+    margin: 0;
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65), 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+  .hero h1 .emoji { display: none; }
+  .hero p {
+    margin: 12px 0 0;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  }
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 20px 120px;
+  }
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px 24px 18px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 20px;
+  }
+  .panel h2 {
+    margin: 0 0 18px;
+    font-size: 13px;
+    color: var(--sub);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .panel h2 .ctrl-right {
+    float: right;
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .filter-row .label {
+    width: 100%;
+    font-size: 12px;
+    color: var(--sub);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+  .chip {
+    border: 1px solid var(--line);
+    background: var(--gray-50);
+    color: var(--gray-700);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.12s ease;
+    font-family: inherit;
+  }
+  .chip:hover {
+    background: var(--gray-100);
+    border-color: var(--gray-400);
+    color: var(--ink);
+  }
+  .chip.active {
+    background: var(--gray-800);
+    border-color: var(--gray-800);
+    color: #fff;
+    font-weight: 500;
+  }
+  .gacha-btn {
+    display: block;
+    width: 100%;
+    margin: 16px 0 0;
+    padding: 18px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(180deg, var(--gray-800) 0%, var(--gray-900) 100%);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0.02em;
+    font-family: inherit;
+    box-shadow: 0 2px 6px rgba(24, 24, 27, 0.15), 0 1px 2px rgba(24, 24, 27, 0.1);
+  }
+  .gacha-btn:hover {
+    background: linear-gradient(180deg, var(--gray-700) 0%, var(--gray-800) 100%);
+    box-shadow: 0 4px 10px rgba(24, 24, 27, 0.2);
+  }
+  .gacha-btn:active { transform: scale(0.99); }
+  .gacha-btn:disabled {
+    background: var(--gray-300);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .result {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 20px;
+    box-shadow: var(--card-shadow);
+    animation: fadeIn 0.25s ease;
+  }
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .result .badge {
+    display: inline-block;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    border: 1px solid var(--gray-200);
+  }
+  .result .name {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  .result .meta {
+    color: var(--sub);
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .result .hours {
+    font-size: 13px;
+    color: var(--gray-700);
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-100);
+    border-radius: 8px;
+  }
+  .result .hours strong {
+    font-weight: 600;
+    margin-right: 6px;
+    color: var(--ink);
+  }
+  .result .hours strong + strong { margin-left: 14px; }
+  .result .desc {
+    font-size: 14px;
+    color: var(--gray-700);
+    padding: 0;
+    margin-bottom: 4px;
+    line-height: 1.7;
+  }
+  .link-row {
+    margin-top: 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .link-btn {
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid var(--line);
+    color: var(--gray-700);
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.12s;
+    background: #fff;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .link-btn:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    color: var(--ink);
+  }
+  .link-btn .ico { margin-right: 4px; }
+  .tag-list {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    font-size: 12px;
+    color: var(--gray-600);
+    background: var(--gray-100);
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--gray-200);
+  }
+  .count {
+    font-size: 12px;
+    color: var(--sub);
+    text-align: right;
+    margin-top: 12px;
+  }
+  .count strong { color: var(--ink); font-weight: 600; }
+  .count .excluded { color: #aaa; margin-left: 8px; }
+  .shop-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
+  .shop-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .shop-card:hover {
+    border-color: var(--gray-400);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .shop-card.recent { opacity: 0.55; background: var(--gray-50); }
+  .shop-card .sc-name { font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .shop-card .sc-sub { color: var(--sub); font-size: 12px; margin-top: 4px; line-height: 1.5; }
+  .shop-card .sc-recent-badge {
+    font-size: 10px;
+    background: #e0e0e0;
+    color: #555;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .link-mini {
+    display: inline-block;
+    color: var(--sub);
+    text-decoration: none;
+    font-size: 11px;
+    margin-right: 10px;
+    margin-top: 8px;
+    border-bottom: 1px solid transparent;
+  }
+  .link-mini:hover { color: var(--ink); border-bottom-color: var(--ink); }
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--sub);
+    padding: 40px 20px;
+    line-height: 1.7;
+  }
+  .empty {
+    text-align: center;
+    color: var(--sub);
+    padding: 24px;
+    font-size: 13px;
+  }
+  .history-panel {
+    font-size: 13px;
+  }
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-date { color: var(--sub); font-size: 12px; }
+  .clear-btn {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--sub);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.12s;
+  }
+  .clear-btn:hover { color: var(--ink); border-color: var(--ink); }
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>大阪おすすめランチ</h1>
+  <p>大阪駅・グランフロント周辺、今日のお昼を選ぶ</p>
+</header>
+<main>
+
+  <section class="panel">
+    <h2>Filter</h2>
+
+    <div class="filter-row" data-filter="price">
+      <div class="label">予算</div>
+      <button class="chip active" data-value="all">すべて</button>
+      <button class="chip" data-value="800">〜800円</button>
+      <button class="chip" data-value="1000">〜1,000円</button>
+      <button class="chip" data-value="1500">〜1,500円</button>
+    </div>
+
+    <div class="filter-row" data-filter="genre">
+      <div class="label">ジャンル</div>
+      <button class="chip active" data-value="all">すべて</button>
+      <button class="chip" data-value="和食">和食</button>
+      <button class="chip" data-value="洋食">洋食</button>
+      <button class="chip" data-value="中華">中華</button>
+      <button class="chip" data-value="麺">ラーメン・うどん</button>
+      <button class="chip" data-value="カレー">カレー</button>
+      <button class="chip" data-value="アジア">アジア・その他</button>
+    </div>
+
+    <div class="filter-row" data-filter="location">
+      <div class="label">場所</div>
+      <button class="chip active" data-value="all">すべて</button>
+      <button class="chip" data-value="grandfront">グランフロント内</button>
+      <button class="chip" data-value="ekimae">駅前ビル系</button>
+      <button class="chip" data-value="lucua">ルクア・うめきた</button>
+      <button class="chip" data-value="other">その他梅田</button>
+    </div>
+
+    <div class="filter-row" data-filter="walk">
+      <div class="label">徒歩の目安</div>
+      <button class="chip active" data-value="all">すべて</button>
+      <button class="chip" data-value="3">3分以内</button>
+      <button class="chip" data-value="5">5分以内</button>
+      <button class="chip" data-value="10">10分以内</button>
+    </div>
+
+    <div class="filter-row" data-filter="dayOpen">
+      <div class="label">今日（<span id="todayLabel">-</span>）営業している店だけ</div>
+      <button class="chip active" data-value="all">指定なし</button>
+      <button class="chip" data-value="today">今日営業中のみ</button>
+    </div>
+
+    <div class="filter-row" data-filter="history">
+      <div class="label">最近行った店を除外</div>
+      <button class="chip" data-value="0">除外しない</button>
+      <button class="chip active" data-value="7">直近7日</button>
+      <button class="chip" data-value="14">直近14日</button>
+      <button class="chip" data-value="30">直近30日</button>
+    </div>
+
+    <div class="count">
+      該当: <strong id="matchCount">0</strong> 店
+      <span class="excluded" id="excludedCount"></span>
+    </div>
+  </section>
+
+  <button id="gachaBtn" class="gacha-btn">今日のランチを決める</button>
+
+  <section id="resultArea" style="margin-top:18px"></section>
+
+  <section class="panel history-panel">
+    <h2>History
+      <span class="ctrl-right">
+        <button class="clear-btn" id="clearHistory">履歴をクリア</button>
+      </span>
+    </h2>
+    <div id="historyList"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Shops</h2>
+    <div id="shopList" class="shop-list"></div>
+  </section>
+
+</main>
+<footer>
+  ※データは公開情報（一休.com、食べログ、ホットペッパー等）を参考にしたサンプルです。<br>
+  営業時間・定休日・価格は変わることがあるため、訪問前に各店舗の公式情報をご確認ください。
+</footer>
+
+<script>
+/* =========================================================
+ * 店舗データ
+ * hours: { mon..sun: "11:00-15:00" or null(休) }
+ * closedNote: 人間向けの定休日メモ
+ * ========================================================= */
+const H_WEEKDAY_LUNCH = { mon:"11:00-15:00", tue:"11:00-15:00", wed:"11:00-15:00", thu:"11:00-15:00", fri:"11:00-15:00", sat:null, sun:null };
+const H_DAILY_LUNCH   = { mon:"11:00-15:00", tue:"11:00-15:00", wed:"11:00-15:00", thu:"11:00-15:00", fri:"11:00-15:00", sat:"11:00-15:00", sun:"11:00-15:00" };
+
+// walk = グランフロント北館からの徒歩分数（目安）
+const shops = [
+  // ===== グランフロント北館（walk 1-2分） =====
+  { name:"世界のビール博物館", genre:"カレー", price:1000, location:"grandfront", where:"グランフロント北館 B1F", walk:1,
+    desc:"カレー・ご飯・サラダ食べ放題＋ドリンク飲み放題で1,000円〜。",
+    tags:["カレー食べ放題","飲み放題","ランチ11-15時"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"大阪トンテキ", genre:"洋食", price:1100, location:"grandfront", where:"グランフロント北館 B1F", walk:1,
+    desc:"分厚い豚ロースに甘辛ソース。白ご飯が進む系。",
+    tags:["トンテキ","ガッツリ","ランチ"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"IL GHIOTTONE di piu'", genre:"洋食", price:1500, location:"grandfront", where:"グランフロント北館 1F", walk:1,
+    desc:"京都発の有名イタリアン。平日パスタランチが狙い目。",
+    tags:["イタリアン","パスタ","京都系"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"Café&Meal MUJI", genre:"和食", price:1200, location:"grandfront", where:"グランフロント北館 4F", walk:2,
+    desc:"選べるデリ3品＋ご飯のヘルシーワンプレート。野菜多め。",
+    tags:["デリ","ヘルシー","カフェ"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"お好み焼 清十郎", genre:"和食", price:1100, location:"grandfront", where:"グランフロント北館 6F", walk:2,
+    desc:"鉄板で焼き上げるお好み焼き。ランチは焼そば・定食も。",
+    tags:["お好み焼き","粉もん","鉄板"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"NORTH tRunk", genre:"洋食", price:1500, location:"grandfront", where:"グランフロント北館 6F", walk:2,
+    desc:"テラス席のある炭火焼き洋食ビストロ。ランチは肉プレート。",
+    tags:["ビストロ","テラス席","炭火"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+
+  // ===== グランフロント南館（walk 3-4分） =====
+  { name:"和食 たちばな", genre:"和食", price:1100, location:"grandfront", where:"グランフロント南館 9F", walk:4,
+    desc:"明太子食べ放題・ご飯と汁物おかわり自由の定食。1,100円〜。",
+    tags:["定食","明太子食べ放題","おかわり自由"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休（施設休館日除く）" },
+  { name:"ボンカリテ", genre:"和食", price:980, location:"grandfront", where:"グランフロント南館 8F", walk:4,
+    desc:"平日ランチ限定の980円しゃぶしゃぶ。野菜たっぷりで軽め。",
+    tags:["しゃぶしゃぶ","平日ランチ","コスパ◎"],
+    hours:H_WEEKDAY_LUNCH, closedNote:"土日（平日ランチのみ）" },
+  { name:"JOE'S SHANGHAI NEWYORK", genre:"中華", price:1500, location:"grandfront", where:"グランフロント南館 7F", walk:4,
+    desc:"蟹肉入り小籠包・エビマヨ・ふかひれのリーズナブルコース。",
+    tags:["小籠包","ふかひれ","ちょっと贅沢"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"揚八", genre:"和食", price:1400, location:"grandfront", where:"グランフロント南館 7F", walk:4,
+    desc:"揚げたてサクサクのとんかつ。ランチはヒレ・ロースの定食。",
+    tags:["とんかつ","定食","揚げたて"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"味の牛たん 喜助", genre:"和食", price:1800, location:"grandfront", where:"グランフロント南館 7F", walk:4,
+    desc:"仙台の老舗。厚切り牛たん定食＋麦飯・テールスープ。",
+    tags:["牛たん","仙台","ちょっと贅沢"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"Indian Tandori Bindu", genre:"カレー", price:1100, location:"grandfront", where:"グランフロント南館 7F", walk:4,
+    desc:"タンドールで焼くナン＆本格インドカレーのセット。",
+    tags:["インドカレー","ナン","スパイス"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"大坂おでん 焼とん 久", genre:"和食", price:1100, location:"grandfront", where:"グランフロント南館 7F", walk:4,
+    desc:"関西風おでんの定食。出汁が染みた大根・牛すじが名物。",
+    tags:["おでん","定食","出汁"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"おぼん食堂 16", genre:"和食", price:1200, location:"grandfront", where:"グランフロント南館 7F", walk:4,
+    desc:"選べるおかず＋ご飯・味噌汁・小鉢のお盆スタイル定食。",
+    tags:["定食","バランス","お盆"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"魚匠 銀平", genre:"和食", price:1400, location:"grandfront", where:"グランフロント南館 8F", walk:4,
+    desc:"和歌山発の海鮮割烹。ランチは刺身・焼魚・煮魚の定食。",
+    tags:["海鮮","定食","和歌山"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"ERICK SOUTH", genre:"カレー", price:1000, location:"grandfront", where:"グランフロント南館 B1F", walk:3,
+    desc:"南インドのミールス（豆・野菜・ヨーグルト等の定食）。",
+    tags:["南インド","ミールス","本格派"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"大阪泉佐野港 活鮨", genre:"和食", price:1300, location:"grandfront", where:"グランフロント南館 B1F", walk:3,
+    desc:"泉佐野港直送の新鮮ネタ。ランチ握り＋お椀のセット。",
+    tags:["寿司","市場直送","握り"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"THE COSMOPOLITAN", genre:"洋食", price:2000, location:"grandfront", where:"グランフロント南館 9F", walk:4,
+    desc:"眺望抜群のステーキレストラン。ランチはちょっと贅沢枠。",
+    tags:["ステーキ","眺望","特別な日"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+
+  // ===== うめきた広場（walk 3分、北館B1直結） =====
+  { name:"マンゴツリーキッチン カオマンガイ", genre:"アジア", price:1000, location:"lucua", where:"うめきた広場 B1F", walk:3,
+    desc:"本格タイ料理カオマンガイがリーズナブルに。さっと食べたい日に。",
+    tags:["タイ料理","カオマンガイ","さっと"],
+    hours:{mon:"11:00-22:00",tue:"11:00-22:00",wed:"11:00-22:00",thu:"11:00-22:00",fri:"11:00-22:00",sat:"11:00-22:00",sun:"11:00-22:00"},
+    closedNote:"年中無休" },
+  { name:"24/7 cafe apartment 梅田", genre:"洋食", price:1200, location:"lucua", where:"うめきた広場 B1F", walk:3,
+    desc:"「至福のごはん」シリーズがヘルシーで人気。カフェ利用も◎。",
+    tags:["ヘルシー","カフェ","女性に人気"],
+    hours:{mon:"11:00-23:00",tue:"11:00-23:00",wed:"11:00-23:00",thu:"11:00-23:00",fri:"11:00-23:00",sat:"11:00-23:00",sun:"11:00-23:00"},
+    closedNote:"年中無休" },
+  { name:"GARB MONAQUE", genre:"洋食", price:1300, location:"lucua", where:"うめきた広場 1F", walk:3,
+    desc:"ガラス張りのイタリアン＆フレンチ。週替わりパスタランチが定番。",
+    tags:["イタリアン","週替わり","おしゃれ"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"春水堂 (チュンスイタン)", genre:"アジア", price:900, location:"lucua", where:"うめきた広場 B1F", walk:3,
+    desc:"タピオカミルクティー発祥の店。魯肉飯や牛肉麺のセットも。",
+    tags:["台湾","タピオカ","魯肉飯"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+
+  // ===== ルクア大阪（walk 5分、連絡橋経由） =====
+  { name:"博多天ぷら たかお", genre:"和食", price:1200, location:"lucua", where:"ルクア大阪 10F", walk:5,
+    desc:"揚げたて天ぷら定食。明太子・いか塩辛食べ放題。",
+    tags:["天ぷら定食","食べ放題","博多"],
+    hours:{mon:"11:00-23:00",tue:"11:00-23:00",wed:"11:00-23:00",thu:"11:00-23:00",fri:"11:00-23:00",sat:"11:00-23:00",sun:"11:00-23:00"},
+    closedNote:"年中無休" },
+  { name:"ねぎ焼やまもと ルクア大阪店", genre:"和食", price:1300, location:"lucua", where:"ルクア大阪 10F", walk:5,
+    desc:"十三の有名店。すじこん入りねぎ焼は定番。",
+    tags:["ねぎ焼","粉もん","名物"],
+    hours:{mon:"11:00-23:00",tue:"11:00-23:00",wed:"11:00-23:00",thu:"11:00-23:00",fri:"11:00-23:00",sat:"11:00-23:00",sun:"11:00-23:00"},
+    closedNote:"年中無休" },
+  { name:"中華そば 高安 ルクア店", genre:"麺", price:1000, location:"lucua", where:"ルクア大阪 10F", walk:5,
+    desc:"一乗寺発のコッテリ系。唐揚げセットが人気。",
+    tags:["ラーメン","唐揚げ","京都系"],
+    hours:{mon:"11:00-23:00",tue:"11:00-23:00",wed:"11:00-23:00",thu:"11:00-23:00",fri:"11:00-23:00",sat:"11:00-23:00",sun:"11:00-23:00"},
+    closedNote:"年中無休" },
+  { name:"鼎's ディンズ", genre:"中華", price:1150, location:"lucua", where:"ルクア大阪 B2F バルチカ", walk:5,
+    desc:"羽根つき焼小籠包が名物。平日カジュアルランチセットは1,150円。",
+    tags:["焼小籠包","台湾","平日ランチ"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"ハモネリア ベジョータ ギョクロ", genre:"アジア", price:1000, location:"lucua", where:"ルクア大阪 B2F バルチカ", walk:5,
+    desc:"スペイン最高級イベリコ豚の生ハム専門店。平日お気軽ランチ1,000円。",
+    tags:["スペイン","生ハム","平日ランチ"],
+    hours:H_WEEKDAY_LUNCH, closedNote:"土日（平日ランチのみ）" },
+
+  // ===== 新梅田食道街・ホワイティうめだ（walk 5-6分） =====
+  { name:"おでん屋 丸", genre:"和食", price:800, location:"other", where:"新梅田食道街", walk:5,
+    desc:"お昼の定食はおでん4品＋茶飯・吸物・漬物で800円。",
+    tags:["おでん定食","800円","老舗"],
+    hours:{mon:"11:00-14:00",tue:"11:00-14:00",wed:"11:00-14:00",thu:"11:00-14:00",fri:"11:00-14:00",sat:"11:00-14:00",sun:null},
+    closedNote:"日曜・祝日" },
+  { name:"天ぷら大吉 ホワイティうめだ店", genre:"和食", price:1000, location:"other", where:"ホワイティうめだ", walk:6,
+    desc:"ランチAボリュームセット1,000円。大海老・キス・ちくわ等。",
+    tags:["天ぷら","ボリューム","1,000円"],
+    hours:H_DAILY_LUNCH, closedNote:"ホワイティうめだに準ずる" },
+  { name:"PRONTO 梅田", genre:"洋食", price:900, location:"other", where:"梅田各所", walk:6,
+    desc:"昼はカフェ、パスタランチが900円前後でサラダ・スープ付。",
+    tags:["パスタ","カフェ","サラダ付"],
+    hours:{mon:"07:00-22:00",tue:"07:00-22:00",wed:"07:00-22:00",thu:"07:00-22:00",fri:"07:00-22:00",sat:"08:00-22:00",sun:"08:00-22:00"},
+    closedNote:"年中無休" },
+
+  // ===== 梅田地下街・曾根崎・E-ma（walk 7分） =====
+  { name:"グリル欧風軒", genre:"洋食", price:1000, location:"other", where:"梅田地下街", walk:7,
+    desc:"ハンバーグやオムライスにエビフライを追加できる洋食屋。",
+    tags:["ハンバーグ","洋食","1,000円以下"],
+    hours:H_DAILY_LUNCH, closedNote:"不定休" },
+  { name:"うどん棒 大阪本店", genre:"麺", price:900, location:"other", where:"曾根崎", walk:7,
+    desc:"香川直送の本格讃岐うどん。かけうどん＋天ぷらでも1,000円以内。",
+    tags:["讃岐うどん","天ぷら","早い"],
+    hours:{mon:"11:00-15:00",tue:"11:00-15:00",wed:"11:00-15:00",thu:"11:00-15:00",fri:"11:00-15:00",sat:"11:00-15:00",sun:null},
+    closedNote:"日曜" },
+  { name:"ごはん処 宮本むなし", genre:"和食", price:750, location:"other", where:"梅田駅前", walk:7,
+    desc:"定食チェーンの王道。魚・生姜焼・カツの定食が700円台〜。",
+    tags:["定食","チェーン","早い安い"],
+    hours:{mon:"07:00-23:00",tue:"07:00-23:00",wed:"07:00-23:00",thu:"07:00-23:00",fri:"07:00-23:00",sat:"07:00-23:00",sun:"07:00-23:00"},
+    closedNote:"年中無休" },
+
+  // ===== 大阪駅前第2〜4ビル（walk 8分、駅南側） =====
+  { name:"梅田 やまや", genre:"和食", price:1100, location:"other", where:"E-ma地下", walk:8,
+    desc:"明太子・高菜・ご飯おかわり自由の定食。博多もつ鍋の系列。",
+    tags:["明太子","おかわり自由","定食"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"Indian Restaurant SPICE", genre:"カレー", price:950, location:"ekimae", where:"大阪駅前ビル", walk:8,
+    desc:"ナン・カレー・サラダ・ドリンクのセットが950円。テイクアウト可。",
+    tags:["インドカレー","ナン食べ放題","テイクアウト"],
+    hours:H_DAILY_LUNCH, closedNote:"年中無休" },
+  { name:"おさかな屋オカピ", genre:"和食", price:1000, location:"ekimae", where:"大阪駅前第4ビル B2F", walk:8,
+    desc:"中央市場仲卸の直営。新鮮な海鮮丼・煮魚定食がお得。",
+    tags:["海鮮丼","市場直送","定食"],
+    hours:{mon:"11:00-14:00",tue:"11:00-14:00",wed:"11:00-14:00",thu:"11:00-14:00",fri:"11:00-14:00",sat:null,sun:null},
+    closedNote:"土日祝" },
+  { name:"金明飯店 2号店", genre:"中華", price:700, location:"ekimae", where:"大阪駅前第3ビル", walk:8,
+    desc:"日替り定食700円〜、八宝菜・酢豚・エビチリなど980円〜。",
+    tags:["町中華","日替り","700円〜"],
+    hours:{mon:"11:00-15:00",tue:"11:00-15:00",wed:"11:00-15:00",thu:"11:00-15:00",fri:"11:00-15:00",sat:"11:00-15:00",sun:null},
+    closedNote:"日曜" },
+  { name:"長屋オムライス 第3ビル店", genre:"洋食", price:900, location:"ekimae", where:"大阪駅前第3ビル", walk:8,
+    desc:"ふわとろオムライスの老舗的存在。11:00-16:00の昼営業。",
+    tags:["オムライス","昼のみ営業","一人OK"],
+    hours:{mon:"11:00-16:00",tue:"11:00-16:00",wed:"11:00-16:00",thu:"11:00-16:00",fri:"11:00-16:00",sat:null,sun:null},
+    closedNote:"土日祝" },
+  { name:"豚々亭（とんとんてい）", genre:"和食", price:900, location:"ekimae", where:"大阪駅前第2ビル B2F", walk:8,
+    desc:"看板「豚もやし定食」。麺入りにするとボリュームUP。",
+    tags:["豚もやし定食","ガッツリ","穴場"],
+    hours:{mon:"11:00-15:00",tue:"11:00-15:00",wed:"11:00-15:00",thu:"11:00-15:00",fri:"11:00-15:00",sat:null,sun:null},
+    closedNote:"土日祝" },
+];
+
+/* =========================================================
+ * フィルタ・ヘルパ
+ * ========================================================= */
+const filters = { price:"all", genre:"all", location:"all", walk:"all", dayOpen:"all", history:"7" };
+
+const DOW_KEY = ["sun","mon","tue","wed","thu","fri","sat"];
+const DOW_JA  = ["日","月","火","水","木","金","土"];
+
+function todayKey() {
+  return DOW_KEY[new Date().getDay()];
+}
+function todayJa() {
+  return DOW_JA[new Date().getDay()];
+}
+function isOpenToday(shop) {
+  return !!shop.hours[todayKey()];
+}
+function todayHours(shop) {
+  return shop.hours[todayKey()] || "本日休業";
+}
+
+/* =========================================================
+ * 履歴（localStorage）— 「行ってきた」で記録
+ * フォールバック: メモリ内
+ * ========================================================= */
+const HISTORY_KEY = "lunch-gacha-history-v1";
+let memoryHistory = [];
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch(e) {
+    return memoryHistory;
+  }
+}
+function saveHistory(list) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+  } catch(e) {
+    memoryHistory = list;
+  }
+}
+function pushHistory(name) {
+  const list = loadHistory();
+  list.unshift({ name, ts: Date.now() });
+  // 直近50件まで
+  saveHistory(list.slice(0, 50));
+  renderHistory();
+  refreshList();
+}
+function clearHistory() {
+  saveHistory([]);
+  renderHistory();
+  refreshList();
+}
+function recentNames(days) {
+  if (!days || days === "0") return new Set();
+  const cutoff = Date.now() - Number(days)*24*60*60*1000;
+  return new Set(loadHistory().filter(h => h.ts >= cutoff).map(h => h.name));
+}
+
+/* =========================================================
+ * URL ビルダ（食べログ検索・Googleマップ検索）
+ * ========================================================= */
+function tabelogUrl(shop) {
+  const q = encodeURIComponent(shop.name + " " + shop.where);
+  return `https://tabelog.com/rstLst/?sw=${q}`;
+}
+function mapUrl(shop) {
+  const q = encodeURIComponent(shop.name + " " + shop.where + " 大阪");
+  return `https://www.google.com/maps/search/?api=1&query=${q}`;
+}
+
+/* =========================================================
+ * チップ挙動
+ * ========================================================= */
+document.querySelectorAll(".filter-row").forEach(row => {
+  const name = row.dataset.filter;
+  row.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      row.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      filters[name] = chip.dataset.value;
+      refreshList();
+    });
+  });
+});
+
+function matches(shop, excludeSet) {
+  if (filters.price !== "all" && shop.price > Number(filters.price)) return false;
+  if (filters.genre !== "all" && shop.genre !== filters.genre) return false;
+  if (filters.location !== "all" && shop.location !== filters.location) return false;
+  if (filters.walk !== "all" && shop.walk > Number(filters.walk)) return false;
+  if (filters.dayOpen === "today" && !isOpenToday(shop)) return false;
+  if (excludeSet && excludeSet.has(shop.name)) return false;
+  return true;
+}
+
+function refreshList() {
+  const excludeSet = recentNames(filters.history);
+  // 基本条件（履歴以外）に合う店
+  const baseList = shops.filter(s => matches(s, null));
+  // 履歴除外も含めた「ガチャ対象」
+  const pickable = baseList.filter(s => !excludeSet.has(s.name));
+
+  document.getElementById("matchCount").textContent = pickable.length;
+  const excludedLen = baseList.length - pickable.length;
+  document.getElementById("excludedCount").textContent =
+    excludedLen > 0 ? `（履歴から ${excludedLen}店 除外）` : "";
+
+  const container = document.getElementById("shopList");
+  if (baseList.length === 0) {
+    container.innerHTML = '<div class="empty">条件に合うお店がありません。条件をゆるめてみてください。</div>';
+  } else {
+    container.innerHTML = baseList.map(s => {
+      const isRecent = excludeSet.has(s.name);
+      return `
+        <div class="shop-card ${isRecent ? "recent" : ""}">
+          <div class="sc-name">
+            <span>${s.name}</span>
+            ${isRecent ? '<span class="sc-recent-badge">最近行った</span>' : ''}
+          </div>
+          <div class="sc-sub">${s.where}<br>${s.genre} ／ ¥${s.price.toLocaleString()}〜 ／ 徒歩${s.walk}分</div>
+          <div class="sc-sub">本日: ${todayHours(s)}　定休: ${s.closedNote}</div>
+          <div>
+            <a class="link-mini" href="${tabelogUrl(s)}" target="_blank" rel="noopener">食べログ →</a>
+            <a class="link-mini" href="${mapUrl(s)}" target="_blank" rel="noopener">地図 →</a>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+  document.getElementById("gachaBtn").disabled = pickable.length === 0;
+  document.getElementById("gachaBtn").textContent =
+    pickable.length === 0 ? "条件に合う店がありません" : "今日のランチを決める";
+}
+
+/* =========================================================
+ * ガチャ
+ * ========================================================= */
+document.getElementById("gachaBtn").addEventListener("click", () => {
+  const excludeSet = recentNames(filters.history);
+  const list = shops.filter(s => matches(s, excludeSet));
+  if (list.length === 0) return;
+  const pick = list[Math.floor(Math.random() * list.length)];
+  renderResult(pick);
+});
+
+function renderResult(pick) {
+  const area = document.getElementById("resultArea");
+  area.innerHTML = `
+    <div class="result">
+      <span class="badge">今日はココ</span>
+      <div class="name">${pick.name}</div>
+      <div class="meta">${pick.where}　／　${pick.genre}　／　¥${pick.price.toLocaleString()}〜　／　徒歩${pick.walk}分</div>
+      <div class="hours">
+        <strong>本日(${todayJa()})の営業:</strong> ${todayHours(pick)}
+        <strong>定休日:</strong> ${pick.closedNote}
+      </div>
+      <div class="desc">${pick.desc}</div>
+      <div class="tag-list">
+        ${pick.tags.map(t => `<span class="tag">#${t}</span>`).join("")}
+      </div>
+      <div class="link-row">
+        <a class="link-btn" href="${tabelogUrl(pick)}" target="_blank" rel="noopener">
+          食べログで見る
+        </a>
+        <a class="link-btn" href="${mapUrl(pick)}" target="_blank" rel="noopener">
+          地図で見る
+        </a>
+        <button class="link-btn" id="visitedBtn">
+          行ってきた
+        </button>
+        <button class="link-btn" id="rerollBtn">
+          もう一回
+        </button>
+      </div>
+    </div>
+  `;
+  document.getElementById("visitedBtn").addEventListener("click", () => {
+    pushHistory(pick.name);
+    document.getElementById("visitedBtn").textContent = "履歴に追加しました";
+    document.getElementById("visitedBtn").disabled = true;
+  });
+  document.getElementById("rerollBtn").addEventListener("click", () => {
+    document.getElementById("gachaBtn").click();
+  });
+  area.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* =========================================================
+ * 履歴UI
+ * ========================================================= */
+function renderHistory() {
+  const list = loadHistory();
+  const el = document.getElementById("historyList");
+  if (list.length === 0) {
+    el.innerHTML = '<div class="empty" style="padding:8px">まだ履歴はありません。ガチャで店を決めたら「行ってきた！」ボタンで記録できます。</div>';
+    return;
+  }
+  const fmt = ts => {
+    const d = new Date(ts);
+    return `${d.getMonth()+1}/${d.getDate()}(${DOW_JA[d.getDay()]})`;
+  };
+  el.innerHTML = list.slice(0, 10).map(h => `
+    <div class="history-item">
+      <span>${h.name}</span>
+      <span class="history-date">${fmt(h.ts)}</span>
+    </div>
+  `).join("");
+}
+document.getElementById("clearHistory").addEventListener("click", () => {
+  if (confirm("履歴をすべて消去します。よろしいですか？")) clearHistory();
+});
+
+/* =========================================================
+ * 初期化
+ * ========================================================= */
+document.getElementById("todayLabel").textContent = todayJa() + "曜日";
+renderHistory();
+refreshList();
+</script>
+</body>
+</html>
